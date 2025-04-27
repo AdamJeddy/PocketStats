@@ -1,10 +1,16 @@
 // categories.js - Categories tab functionality
 const core = require('./core.js');
+const dashboard = require('./dashboard.js');
 
 // Update category breakdown section
 function updateCategoryBreakdown() {
-    const currentYear = new Date().getFullYear();
-    const yearTransactions = core.getTransactionsByYear(currentYear);
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    
+    // Get the selected year from dashboard if available, otherwise use current year
+    const selectedYear = window.selectedYear || currentYear;
+    
+    const yearTransactions = core.getTransactionsByYear(selectedYear);
 
     const categoryTotals = core.calculateCategoryTotals(yearTransactions);
     const categoryContainer = document.getElementById('category-breakdown');
@@ -32,6 +38,9 @@ function updateCategoryBreakdown() {
 // Initialize categories tab
 function initialize() {
     updateCategoryBreakdown();
+    
+    // Listen for year change events
+    document.addEventListener('yearChanged', updateCategoryBreakdown);
 }
 
 // Export module functions

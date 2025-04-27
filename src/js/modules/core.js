@@ -95,12 +95,19 @@ function getTransactionsByYearAndMonth(year, month) {
     );
 }
 
+// Get all unique years from transactions
+function getAvailableYears() {
+    const years = [...new Set(transactions.map(trx => trx.date.getFullYear()))];
+    return years.sort((a, b) => b - a); // Sort descending (newest first)
+}
+
 // Export functions for use in other modules
 module.exports = {
     loadTransactions,
     getTransactions,
     getTransactionsByYear,
     getTransactionsByYearAndMonth,
+    getAvailableYears,
     formatCurrency,
     calculateTotal,
     calculateCategoryTotals,

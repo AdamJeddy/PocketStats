@@ -7,7 +7,17 @@ function createTransactionsTable() {
     tbody.innerHTML = '';
 
     // Get all transactions
-    const transactions = core.getTransactions();
+    let transactions = core.getTransactions();
+    
+    // If a year is selected, filter by year
+    if (window.selectedYear) {
+        transactions = core.getTransactionsByYear(window.selectedYear);
+        
+        // Update table title to show which year we're viewing
+        document.getElementById('transactions-title').textContent = `Transactions (${window.selectedYear})`;
+    } else {
+        document.getElementById('transactions-title').textContent = 'All Transactions';
+    }
 
     // Sort transactions by date (most recent first)
     const sortedTransactions = [...transactions].sort((a, b) => b.date - a.date);
@@ -29,6 +39,9 @@ function createTransactionsTable() {
 // Initialize transactions tab
 function initialize() {
     createTransactionsTable();
+    
+    // Listen for year change events
+    document.addEventListener('yearChanged', createTransactionsTable);
 }
 
 // Export module functions
