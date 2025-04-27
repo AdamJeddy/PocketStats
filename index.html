@@ -1,18 +1,363 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Finance Tracker</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.7/css/dataTables.dataTables.min.css">
-  <script src="https://cdn.datatables.net/2.0.7/js/dataTables.min.js"></script>
-  <script defer src="renderer.js"></script>
+    <meta charset="UTF-8">
+    <title>PocketStats 📊</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --background-color: #f8fafc;
+            --tile-background: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --sidebar-width: 240px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            height: 100vh; /* Ensure body takes full height */
+            overflow: hidden; /* Prevent scrolling on body */
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--tile-background);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            height: 100vh; /* Full height */
+            position: fixed; /* Fixed position */
+            left: 0;
+            top: 0;
+            overflow-y: auto; /* Allow scrolling if content is too tall */
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--background-color);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: var(--sidebar-width); /* Push content to the right of sidebar */
+            width: calc(100% - var(--sidebar-width));
+            height: 100vh; /* Full height */
+            overflow-y: auto; /* Allow scrolling */
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-tile {
+            background: var(--tile-background);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-tile h3 {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chart-container {
+            background: var(--tile-background);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .transactions-container {
+            background: var(--tile-background);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        #transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        #transactions-table th,
+        #transactions-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #transactions-table th {
+            background-color: var(--background-color);
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        #transactions-table tr:hover {
+            background-color: var(--background-color);
+        }
+
+        .period-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .period-selector button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--tile-background);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .period-selector button.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .category-tile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--tile-background);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .category-info {
+            flex: 1;
+        }
+
+        .category-name {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .category-amount {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+    </style>
+    <!-- Use the new modular JavaScript structure -->
+    <script defer src="src/js/app.js"></script>
 </head>
 <body>
-  <h1>Pocket Stats</h1>
-  <table id="dataTable" class="display" style="width:100%"></table>
-  <canvas id="monthlyChart" width="800" height="400"></canvas>
-  <canvas id="categoryChart" width="800" height="400"></canvas>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>PocketStats</h1>
+        </div>
+        <div class="nav-items">
+            <div class="nav-item active" data-tab="dashboard">
+                <span class="material-icons">dashboard</span>
+                Dashboard
+            </div>
+            <div class="nav-item" data-tab="transactions">
+                <span class="material-icons">receipt_long</span>
+                Transactions
+            </div>
+            <div class="nav-item" data-tab="categories">
+                <span class="material-icons">category</span>
+                Categories
+            </div>
+            <div class="nav-item" data-tab="analysis">
+                <span class="material-icons">insights</span>
+                Analysis
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="dashboard">
+            <div class="dashboard-grid">
+                <div class="stat-tile">
+                    <h3><span class="material-icons">calendar_today</span>This Month's Spend</h3>
+                    <div class="stat-value" id="current-month-total">-</div>
+                </div>
+                <div class="stat-tile">
+                    <h3><span class="material-icons">date_range</span>This Year's Total</h3>
+                    <div class="stat-value" id="current-year-total">-</div>
+                </div>
+                <div class="stat-tile">
+                    <h3><span class="material-icons">trending_up</span>Monthly Average (2025)</h3>
+                    <div class="stat-value" id="monthly-average">-</div>
+                </div>
+                <div class="stat-tile">
+                    <h3><span class="material-icons">category</span>Top Category</h3>
+                    <div class="stat-value" id="top-category">-</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2 class="chart-title">
+                        <span class="material-icons">show_chart</span>
+                        Monthly Spending (2025)
+                    </h2>
+                </div>
+                <canvas id="monthlyChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2 class="chart-title">
+                        <span class="material-icons">pie_chart</span>
+                        Category Distribution
+                    </h2>
+                </div>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Transactions Tab -->
+        <div class="tab-content" id="transactions">
+            <div class="transactions-container">
+                <div class="chart-header">
+                    <h2 class="chart-title">
+                        <span class="material-icons">receipt_long</span>
+                        All Transactions
+                    </h2>
+                </div>
+                <table id="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Purchase Date</th>
+                            <th>Category</th>
+                            <th>Item</th>
+                            <th>Amount</th>
+                            <th>Payment Type</th>
+                            <th>Additional Info</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Categories Tab -->
+        <div class="tab-content" id="categories">
+            <div class="dashboard-grid">
+                <div id="category-breakdown">
+                    <!-- Category tiles will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Tab -->
+        <div class="tab-content" id="analysis">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2 class="chart-title">
+                        <span class="material-icons">trending_up</span>
+                        Spending Trends
+                    </h2>
+                </div>
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
