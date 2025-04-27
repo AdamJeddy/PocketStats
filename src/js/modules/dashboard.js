@@ -19,20 +19,25 @@ function updateDashboard() {
         selectedYear = currentYear;
     }
     
+    console.log('Selected Year:', selectedYear);
+    
     // Store selected year in window for other modules to access
     window.selectedYear = selectedYear;
     
     // Get filtered transactions
     const yearTransactions = core.getTransactionsByYear(selectedYear);
+    console.log(`Found ${yearTransactions.length} transactions for year ${selectedYear}`);
     
     // For current year, only use transactions up to the current month
     let monthTransactions = [];
     if (selectedYear === currentYear) {
         monthTransactions = core.getTransactionsByYearAndMonth(currentYear, currentMonth);
+        console.log(`Found ${monthTransactions.length} transactions for current month`);
     }
 
     // Calculate totals
     const yearTotal = core.calculateTotal(yearTransactions);
+    console.log(`Year total for ${selectedYear}: ${yearTotal}`);
     const monthTotal = core.calculateTotal(monthTransactions);
     
     // Calculate monthly average
@@ -167,31 +172,57 @@ function createCategoryChart(transactions) {
 
 // Switch to previous year
 function prevYear() {
+    console.log("Previous year button clicked");
     const availableYears = core.getAvailableYears();
+    console.log("Available years:", availableYears);
+    
     const currentIndex = availableYears.indexOf(selectedYear);
+    console.log("Current year index:", currentIndex);
     
     if (currentIndex < availableYears.length - 1) {
         selectedYear = availableYears[currentIndex + 1];
+        console.log(`Moving to previous year: ${selectedYear}`);
         updateDashboard();
+    } else {
+        console.log("Already at the oldest year");
     }
 }
 
 // Switch to next year
 function nextYear() {
+    console.log("Next year button clicked");
     const availableYears = core.getAvailableYears();
+    console.log("Available years:", availableYears);
+    
     const currentIndex = availableYears.indexOf(selectedYear);
+    console.log("Current year index:", currentIndex);
     
     if (currentIndex > 0) {
         selectedYear = availableYears[currentIndex - 1];
+        console.log(`Moving to next year: ${selectedYear}`);
         updateDashboard();
+    } else {
+        console.log("Already at the most recent year");
     }
 }
 
 // Initialize dashboard
 function initialize() {
-    // Set up year navigation buttons
-    document.getElementById('prev-year').addEventListener('click', prevYear);
-    document.getElementById('next-year').addEventListener('click', nextYear);
+    // Set up year navigation buttons with direct event handling
+    const prevYearBtn = document.getElementById('prev-year');
+    const nextYearBtn = document.getElementById('next-year');
+    
+    prevYearBtn.addEventListener('click', function(e) {
+        console.log("Prev year button clicked");
+        e.preventDefault();
+        prevYear();
+    });
+    
+    nextYearBtn.addEventListener('click', function(e) {
+        console.log("Next year button clicked");
+        e.preventDefault();
+        nextYear();
+    });
     
     updateDashboard();
 }
