@@ -95,6 +95,47 @@
                         <span id="transactions-title">All Transactions</span>
                     </h2>
                 </div>
+                
+                <!-- Filter controls -->
+                <div class="filters-container">
+                    <div class="filter-header">
+                        <span class="material-icons">filter_alt</span>
+                        <span>Filters</span>
+                        <button id="clear-filters" class="filter-button">
+                            <span class="material-icons">clear</span>
+                            Clear Filters
+                        </button>
+                    </div>
+                    <div class="filter-options">
+                        <div class="filter-group">
+                            <label for="category-filter">Category:</label>
+                            <select id="category-filter" class="filter-select">
+                                <option value="">All Categories</option>
+                                <!-- Categories will be populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="payment-filter">Payment Type:</label>
+                            <select id="payment-filter" class="filter-select">
+                                <option value="">All Payment Types</option>
+                                <!-- Payment types will be populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="amount-min">Amount Range:</label>
+                            <div class="range-inputs">
+                                <input type="number" id="amount-min" placeholder="Min" class="filter-input">
+                                <span>to</span>
+                                <input type="number" id="amount-max" placeholder="Max" class="filter-input">
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label for="search-filter">Search:</label>
+                            <input type="text" id="search-filter" placeholder="Search items..." class="filter-input">
+                        </div>
+                    </div>
+                </div>
+                
                 <table id="transactions-table">
                     <thead>
                         <tr>
