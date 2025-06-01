@@ -262,6 +262,7 @@ body {
     opacity: 0.5;
 }
 
+/* Filter styles */
 .filters-container {
     background: var(--background-color);
     border-radius: 0.5rem;
@@ -346,4 +347,17 @@ body {
 
 .range-inputs input {
     width: 100%;
+}
+
+/* Category chart specific styles */
+.category-chart-container {
+    max-height: 350px; /* Limit overall height */
+    height: auto;
+    width: 50%;
+}
+
+.category-chart-container canvas {
+    max-height: 280px; /* Limit canvas height */
+    width: 100% !important;
+    height: auto !important;
 }

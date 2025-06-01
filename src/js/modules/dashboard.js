@@ -147,9 +147,7 @@ function createCategoryChart(transactions) {
     // Clear any previous chart
     if (categoryChart instanceof Chart) {
         categoryChart.destroy();
-    }
-
-    categoryChart = new Chart(ctx, {
+    }    categoryChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: labels,
@@ -161,9 +159,17 @@ function createCategoryChart(transactions) {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'right'
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12,  // Smaller color boxes
+                        padding: 10,    // Less padding between items
+                        font: {
+                            size: 11    // Smaller font size
+                        }
+                    }
                 }
             }
         }
